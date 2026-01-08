@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ultimate Digital Clock</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ---- CSS (Styling) ---- */
+    :root {
+      --main-color: #00ffff;
+      --font-family: 'Orbitron', sans-serif;
+      --bg-gradient: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #000000, #1c1c1c);
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--bg-gradient);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      margin: 0;
+      overflow: hidden;
+      transition: background 1s ease;
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* UI Elements */
+    button,
+    select,
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: var(--main-color);
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: bold;
+      transition: 0.3s;
+      backdrop-filter: blur(4px);
+      margin: 5px;
+    }
+
+    button:hover,
+    select:hover {
+      background: var(--main-color);
+      color: #000;
+      box-shadow: 0 0 15px var(--main-color);
+      outline: none;
+    }
+
+    /* Dropdown Menu */
+    header {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid var(--main-color);
+      border-radius: 10px;
+      width: 180px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      z-index: 20;
+    }
+
+    .dropdown a {
+      display: block;
+      color: var(--main-color);
+      text-decoration: none;
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9rem;
+    }
+
+    .dropdown a:hover {
+      background: var(--main-color);
+      color: black;
+    }
+
+    /* Clock Container */
+    .clock-wrapper {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+      padding: 40px 60px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .clock {
+      font-size: 5rem;
+      font-weight: bold;
+      color: var(--main-color);
+      text-shadow: 0 0 20px var(--main-color), 0 0 40px var(--main-color);
+      transition: color 0.5s;
+    }
+
+    .date {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-top: 10px;
+      letter-spacing: 2px;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      background: #111;
+      padding: 30px;
+      border-radius: 15px;
+      border: 1px solid var(--main-color);
+      width: 320px;
+      max-height: 80vh;
+      overflow-y: auto;
+      text-align: left;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      text-align: center;
+      color: var(--main-color);
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+
+    .setting-group {
+      margin-bottom: 15px;
+    }
+
+    .setting-group label {
+      display: block;
+      color: #aaa;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+
+    .setting-group select,
+    .setting-group input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .close-btn {
+      width: 100%;
+      background: var(--main-color);
+      color: black;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <button id="moreBtn">☰ Menu</button>
+    <div class="dropdown" id="dropdownMenu">
+      <a href="#" id="settingsLink">⚙️ Settings</a>
+      <a href="#" id="aboutLink">ℹ️ About</a>
+      <hr style="border-color: #333; margin: 0;">
+      <a href="https://www.google.com" target="_blank">🔍 Google</a>
+      <a href="https://www.youtube.com" target="_blank">📺 YouTube</a>
+      <a href="https://weather.com" target="_blank">⛅ Weather</a>
+      <a href="https://open.spotify.com" target="_blank">🎧 Spotify</a>
+      <a href="#" id="shareLink">📤 Share App</a>
+    </div>
+  </header>
+
+  <div class="clock-wrapper">
+    <div class="clock" id="digital-clock">00:00:00</div>
+    <div class="date" id="current-date">Loading...</div>
+  </div>
+
+  <div>
+    <button id="fullscreenBtn">⛶ Fullscreen</button>
+    <button id="musicBtn">🎵 Play Music</button>
+  </div>
+
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h2>⚙️ Customization</h2>
+
+      <div class="setting-group">
+        <label>⏰ Time Format</label>
+        <select id="formatSelector">
+          <option value="24">24-Hour (13:45)</option>
+          <option value="12">12-Hour (01:45 PM)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label>🌄 Background Theme</label>
+        <select id="bgSelector">
+          <option value="default">Cyberpunk (Default)</option>
+          <option value="sunset">Sunset Vibes</option>
+          <option value="ocean">Deep Ocean</option>
+          <option value="matrix">Matrix Green</option>
+          <option value="fire">Magma Fire</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label>🎨 Clock Color</label>
+        <input type="color" id="colorPicker" value="#00ffff" style="height: 40px;">
+      </div>
+
+      <div class="setting-group">
+        <label>🔠 Font Style</label>
+        <select id="fontSelector">
+          <option value="'Orbitron', sans-serif">Orbitron (Sci-Fi)</option>
+          <option value="'Share Tech Mono', monospace">Tech Mono (Hacker)</option>
+          <option value="'Courier New', monospace">Retro (Classic)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label>🎵 Select Music Track</label>
+        <select id="musicSelector">
+          <option value="track1">🎧 Chill Vibes</option>
+          <option value="track2">🎹 Dreamy Piano</option>
+          <option value="track3">⚡ Synthwave</option>
+          <option value="track4">🌧️ Deep Focus</option>
+        </select>
+      </div>
+
+      <button class="close-btn" onclick="document.getElementById('settingsModal').style.display='none'">Save &
+        Close</button>
+    </div>
+  </div>
+
+  <div id="aboutModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+      <h2>About</h2>
+      <p>Digital Clock v3.6</p>
+      <p>Created with HTML, CSS & JS.</p>
+      <button class="close-btn" onclick="document.getElementById('aboutModal').style.display='none'">Close</button>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
+    <source src="https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/1.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // --- State Variables ---
+    let is24Hour = true;
+    const root = document.documentElement;
+
+    // 1. CLOCK LOGIC
+    const updateClock = () => {
+      const now = new Date();
+      let options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: !is24Hour };
+      document.getElementById('digital-clock').textContent = now.toLocaleTimeString('en-US', options);
+      document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    };
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. BACKGROUND & STYLES
+    document.getElementById('bgSelector').addEventListener('change', (e) => {
+      let bgStyle = '';
+      switch (e.target.value) {
+        case 'sunset': bgStyle = 'linear-gradient(-45deg, #ff512f, #dd2476, #ff9966, #ff5e62)'; break;
+        case 'ocean': bgStyle = 'linear-gradient(-45deg, #00c6ff, #0072ff, #000428, #004e92)'; break;
+        case 'matrix': bgStyle = 'linear-gradient(-45deg, #000000, #0f9b0f, #000000, #003300)'; break;
+        case 'fire': bgStyle = 'linear-gradient(-45deg, #f12711, #f5af19, #870000, #190a05)'; break;
+        default: bgStyle = 'linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #000000, #1c1c1c)';
+      }
+      root.style.setProperty('--bg-gradient', bgStyle);
+    });
+
+    document.getElementById('formatSelector').addEventListener('change', (e) => { is24Hour = e.target.value === '24'; updateClock(); });
+    document.getElementById('colorPicker').addEventListener('input', (e) => { root.style.setProperty('--main-color', e.target.value); });
+    document.getElementById('fontSelector').addEventListener('change', (e) => { root.style.setProperty('--font-family', e.target.value); });
+
+    // 3. MENU & MODALS
+    const dropdown = document.getElementById('dropdownMenu');
+    document.getElementById('moreBtn').onclick = (e) => { e.stopPropagation(); dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block'; };
+    document.getElementById('settingsLink').onclick = (e) => { e.stopPropagation(); document.getElementById('settingsModal').style.display = 'flex'; dropdown.style.display = 'none'; };
+    document.getElementById('aboutLink').onclick = (e) => { e.stopPropagation(); document.getElementById('aboutModal').style.display = 'flex'; dropdown.style.display = 'none'; };
+    window.onclick = () => dropdown.style.display = 'none';
+
+    // 4. MUSIC PLAYER LOGIC (FIXED WITH GITHUB LINKS)
+    const musicBtn = document.getElementById('musicBtn');
+    const audio = document.getElementById('bgMusic');
+    const musicSelector = document.getElementById('musicSelector');
+
+    // These links are hosted on GitHub and are very stable for demos
+    const tracks = {
+      track1: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/1.mp3",
+      track2: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/2.mp3",
+      track3: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/3.mp3",
+      track4: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/4.mp3"
+    };
+
+    // Error Handling
+    audio.addEventListener('error', function (e) {
+      console.log("Audio Error:", e);
+      musicBtn.textContent = '❌ Load Failed';
+      alert("Music failed to load. Please check your internet connection.");
+    });
+
+    // Play/Pause Button
+    musicBtn.onclick = () => {
+      if (audio.paused) {
+        musicBtn.textContent = '⏳ Loading...';
+
+        // Try to play
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {
+            // Play started!
+            musicBtn.textContent = '🔇 Stop Music';
+          })
+            .catch(error => {
+              console.log("Play blocked:", error);
+              musicBtn.textContent = '⚠️ Failed';
+              alert("Auto-play blocked! Please interact with the page or check internet.");
+            });
+        }
+      } else {
+        audio.pause();
+        musicBtn.textContent = '🎵 Play Music';
+      }
+    };
+
+    // Change Track Logic
+    musicSelector.addEventListener('change', (e) => {
+      const selectedTrack = tracks[e.target.value];
+      const wasPlaying = !audio.paused;
+
+      musicBtn.textContent = '⏳ Loading...';
+      audio.src = selectedTrack;
+      audio.load();
+
+      if (wasPlaying) {
+        audio.play().then(() => {
+          musicBtn.textContent = '🔇 Stop Music';
+        }).catch(e => console.log(e));
+      } else {
+        musicBtn.textContent = '🎵 Play Music';
+      }
+    });
+
+    // 5. FULLSCREEN
+    document.getElementById('fullscreenBtn').onclick = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(e => console.log(e));
+        document.getElementById('fullscreenBtn').textContent = '❎ Exit';
+      } else {
+        document.exitFullscreen();
+        document.getElementById('fullscreenBtn').textContent = '⛶ Fullscreen';
+      }
+    };
+
+    // Share
+    document.getElementById('shareLink').onclick = () => {
+      if (navigator.share) navigator.share({ title: 'My Clock', url: window.location.href });
+      else alert('Link copied!');
+    };
+  </script>
+</body>
+
+</html>
